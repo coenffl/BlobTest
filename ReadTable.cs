@@ -18,11 +18,11 @@ namespace coenffl.Function
         public static Task<string> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]
         HttpRequest req, ILogger log, ExecutionContext context)
         {
-            string connStrA = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
+           string connStrA = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
             string requestBody = new StreamReader(req.Body).ReadToEnd();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             string PartitionKeyA = data.PartitionKey;
-            string RowkeyA = data.RowKey;
+            string RowKeyA = data.RowKey;
             // 읽어오는 것이기 때문에 키만 있으면 된다.
 
             CloudStorageAccount stoA = CloudStorageAccount.Parse(connStrA);
