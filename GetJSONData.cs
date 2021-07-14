@@ -13,15 +13,16 @@ namespace coenffl.Function
     public static class GetJSONData
     {
         [FunctionName("GetJSONData")]
-        public static string Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] 
+        public static string Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]
         HttpRequest req, ILogger log, ExecutionContext context)
         {
             string connStrA = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
             string requestBody = new StreamReader(req.Body).ReadToEnd();
-            dynamic data = JsonConvert.DeserializeObject(requestBody)
-            string valueA = data.a; 
+            dynamic data = JsonConvert.DeserializeObject(requestBody);
+            string valueA = data.a;
 
             return valueA;
+       
         }
     }
 }
