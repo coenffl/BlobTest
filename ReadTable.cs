@@ -55,14 +55,14 @@ namespace coenffl.Function
             {
                 do 
                 {
-                  TableQuerySegment<MemoData> segment = await tableA.ExecuteQuerySegmentAsync(rangeQ, tokenA);
-                  tokenA = segment.ContinuationToken;
-                  foreach (MemoData entity in segment)
+                 TableQuerySegment<MemoData> segment = await tableA.ExecuteQuerySegmentedAsync(rangeQ, tokenA);
+                    tokenA = segment.ContinuationToken;
+                    foreach (MemoData entity in segment)
                   {
                       // 필요없는 데이터 
                       JObject srcObj = JObject.FromObject(entity);
-                      srcObj.Remove("Timestamp");
-                      resultArr.Add(srcObj);
+                       // srcObj.Remove("Timestamp");
+                        resultArr.Add(srcObj);
                   }
 
                 } while (tokenA != null);
@@ -75,8 +75,8 @@ namespace coenffl.Function
                 throw;
             }
 
-            string resultA = Newtonsoft.Json.JsonConvert.SerializeObject(resultArr);
-            if(resultA != null) return resultA;
+             string resultA = Newtonsoft.Json.JsonConvert.SerializeObject(resultArr);
+            if (resultA != null) return resultA;
             else return "No Data";
         }
 
