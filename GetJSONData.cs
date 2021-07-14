@@ -7,6 +7,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Azure.Storage.Blobs;
 
 namespace coenffl.Function
 {
@@ -20,8 +21,23 @@ namespace coenffl.Function
             string requestBody = new StreamReader(req.Body).ReadToEnd();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             string valueA = data.a;
+            
+            BlobServiceClient clientA = new BlobServiceClient(connStrA);
+            BlobContainerClient containerA = clientA.GetBlobContainerClient("coenfflcon")
+            BlobClient blobA = containerA.GetBlobClient(valueA + ".json");
 
-            return valueA;
+            string responseA = "No Data";
+
+            if(blobA.Exists())
+            {
+                using (MemoryStream msA = new MemoryStream())
+            {
+                blobA.DownloadTo(msA);
+                responseA = System.Text.Encoding.UTF8.GetString(msA.ToArray());
+            }
+            }
+
+            return responseA;
        
         }
     }
