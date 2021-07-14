@@ -7,34 +7,50 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Azure.Storage.Blobs;
+using Microsoft.Azure.Cosmos.Table;
 
 namespace coenffl.Function
 {
-    public static class GetJSONData
+    public static class WriteTable
     {
-        [FunctionName("GetJSONData")]
-        public static string Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]
+        [FunctionName("WriteTable")]
+        public static void Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]
         HttpRequest req, ILogger log, ExecutionContext context)
         {
             string connStrA = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
             string requestBody = new StreamReader(req.Body).ReadToEnd();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
-            string valueA = data.a;
+            string PartitionKeyA = data.PartitionKey;
+            string RowkeyA = data.RowKey;
+            string contentA = data.Content;
+            // 여기서 데이터를 받음
 
-            BlobServiceClient clientA = new BlobServiceClient(connStrA);
-            BlobContainerClient containerA = clientA.GetBlobContainerClient("coenfflcon");
-            BlobClient blobA = containerA.GetBlobClient(valueA + ".json");
+            CloudStorageAccount stoA = CloudStorageAccount.Parse(connStrA);
+            // 스토리지 어카운트 생성
+            CloudTableClient tbC = stoA.CreateCloudTableClient();
+            CloudTable tableA = tbC.GetTableReference("tableA");
 
-            string responseA = "No Data";
+            writeToTable(tableA, contentA, PartitionKeyA, RowkeyA);
 
-            if (blobA.Exists())
-            {
-                using (MemoryStream msA = new MemoryStream())
-                {
-                    blobA.DownloadTo(msA);
-                    responseA = System.Text.Encoding.UTF8.GetString(msA.ToArray());
-                }
-            }
-            return responseA;
         }
+
+        // 함수가 실행될 때 데이터를 받아옴 
+        static void writeToTable(CloudTable tableA, string contentA, string PartitionKeyA, string RowKeyA)
+        // JSON 형태로 받아온 데이터를 모두 받아온다.
+        {
+            MemoData memoA = new MemoData();
+            memoA.PartitionKey = PartitionKeyA;
+            memoA.RowKey = RowKeyA;
+            memoA.content = contentA;
+
+            TableOperation operA = TableOperation.InsertOrReplace(memoA);
+            tableA.Execute(operA);
+        }
+
+        private class MemoData: TableEntity 
+        // 키를 따로 적지 않아도 TableEntity에 들어있다.
+        {
+            public string content { get; set; }
+        }
+    }
+}
